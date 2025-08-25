@@ -1,29 +1,39 @@
 mod balances;
 mod system;
 
+
+
+
+mod types {
+	pub type AccountId = String;
+	pub type Balance = u128;
+	pub type BlockNumber = u32;
+	pub type Nonce = u32;
+}
+
+
+
 #[derive(Debug)]
-
-
 pub struct Runtime {
-    system: system::Pallet,
+	system: system::Pallet<Self>,
+	balances: balances::Pallet<types::AccountId, types::Balance>,
+}
 
-    balances: balances::Pallet,
-
+impl system::Config for Runtime {
+	type AccountId = types::AccountId;
+	type BlockNumber = types::BlockNumber;
+	type Nonce = types::Nonce;
 }
 
 impl Runtime {
-
-    fn new() -> Self {
-        Self {
-            system: system::Pallet::new(),
-            balances: balances::Pallet::new(),
-        }
-    }
+	
+	fn new() -> Self {
+		Self { system: system::Pallet::new(), balances: balances::Pallet::new() }
+	}
 }
 
 fn main() {
-    let mut runtime = Runtime::new();
-
+	let mut runtime = Runtime::new();
 	let alice = "alice".to_string();
 	let bob = "bob".to_string();
 	let charlie = "charlie".to_string();
@@ -41,7 +51,6 @@ fn main() {
 	
 	runtime.system.inc_nonce(&alice);
 	let _res = runtime.balances.transfer(alice, charlie, 20).map_err(|e| eprintln!("{e}"));
-
 
 	println!("{runtime:#?}");
 }
